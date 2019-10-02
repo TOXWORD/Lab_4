@@ -13,7 +13,7 @@ public class CReader {
 
     private boolean hasBr;
     private boolean hasComm;
-    boolean hasOp1Star;
+    private boolean hasOp1Star;
 
     CReader() throws FileNotFoundException {
 
@@ -29,9 +29,7 @@ public class CReader {
         while (sc.hasNextLine()) {
             text.append(sc.nextLine()).append('\n');
         }
-
         sc.close();
-
     }
 
     private void hasBracket(int pos) {
@@ -76,16 +74,13 @@ public class CReader {
             hasOp1Star = false;
             return pos + 2;
         }
-
         return pos;
     }
 
     public void delComments() {
 
         changedText = new StringBuffer();
-        boolean hasOp2Star = false;
 
-        char firstS;
         char curS;
 
         for (int i = 0; i < text.length() - 1; i++) {
