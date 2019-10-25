@@ -15,7 +15,7 @@ public class CReader {
     private boolean hasComm;
     private boolean hasOp1Star;
 
-    CReader() throws FileNotFoundException {
+    public CReader() throws FileNotFoundException {
 
         text = new StringBuffer();
         changedText = new StringBuffer();
@@ -24,21 +24,34 @@ public class CReader {
         hasOp1Star = false;
 
         File f = new File(pathIn);
-        Scanner sc = new Scanner(f);
-
-        while (sc.hasNextLine()) {
-            text.append(sc.nextLine()).append('\n');
+        try (Scanner sc = new Scanner(f)) {
+            while (sc.hasNextLine()) {
+                text.append(sc.nextLine()).append('\n');
+            }
         }
-        sc.close();
     }
 
-    private void hasBracket(int pos) {
-        char current = text.charAt(pos);
+    private void hasBracket(int pos){
+        char current = 0;
+        char preCurrent = 0;
+        char afterCurrent = 0;
+        char pre2Current = 0;
 
-        if (current == '"' && text.charAt(pos - 1) == '\'' && text.charAt(pos + 1) == '\'') {
+        try{
+            current = text.charAt(pos);
+            preCurrent = text.charAt(pos - 1);
+            afterCurrent = text.charAt(pos + 1);
+            pre2Current = text.charAt(pos - 2);
+
+        }
+        catch(Exception e){
+
+        }
+
+        if (current == '"' && preCurrent == '\'' && afterCurrent == '\'') {
             return;
         }
-        if (current == '"' && text.charAt(pos - 1) == '\\' && text.charAt(pos - 2) != '\\') {
+        if (current == '"' && preCurrent == '\\' && pre2Current != '\\') {
             return;
         }
         if (current == '"' && hasComm) {
@@ -51,11 +64,22 @@ public class CReader {
     }
 
     private int isCommented(int pos) {
-        char current = text.charAt(pos);
+        char current = 0;
+        char afterCurrent = 0;
 
-        if (current == '/' && text.charAt(pos + 1) == '/' && !hasBr) {
+        try{
+            current = text.charAt(pos);
+            afterCurrent = text.charAt(pos + 1);
+        }
+        catch(Exception e){
+
+        }
+
+        if (current == '/' && afterCurrent == '/' && !hasBr) {
             hasComm = true;
-            return pos + 2;
+            if(pos < text.length() - 2) {
+                return pos + 2;
+            }
         }
         if (current == '\n') {
             hasComm = false;
@@ -64,24 +88,33 @@ public class CReader {
     }
 
     private int oneStarCommented(int pos) {
-        char current = text.charAt(pos);
+        char current = 0;
+        char afterCurrent = 0;
 
-        if (current == '/' && text.charAt(pos + 1) == '*' && !hasBr) {
-            hasOp1Star = true;
-            return pos + 1;
+        try{
+            current = text.charAt(pos);
+            afterCurrent = text.charAt(pos + 1);
         }
-        if (hasOp1Star && current == '*' && text.charAt(pos + 1) == '/') {
+        catch(Exception e){
+
+        }
+        if (current == '/' && afterCurrent == '*' && !hasBr) {
+            hasOp1Star = true;
+            if(pos < text.length() - 1) {
+                return pos + 1;
+            }
+        }
+        if (hasOp1Star && current == '*' && afterCurrent == '/') {
             hasOp1Star = false;
-            return pos + 2;
+            if(pos < text.length() - 2) {
+                return pos + 2;
+            }
         }
         return pos;
     }
 
-    public void delComments() {
-
+    public void delComments(){
         changedText = new StringBuffer();
-
-        char curS;
 
         for (int i = 0; i < text.length() - 1; i++) {
 
@@ -89,19 +122,16 @@ public class CReader {
             i = isCommented(i);
             i = oneStarCommented(i);
 
-            curS = text.charAt(i);
-
             if (!(hasComm || hasOp1Star)) {
-                changedText.append(curS);
+                changedText.append(text.charAt(i));
             }
         }
     }
 
     public void printText() throws IOException {
 
-        FileWriter f = new FileWriter(pathOut);
-        f.write(changedText.toString());
-        f.close();
+        try (FileWriter f = new FileWriter(pathOut)) {
+            f.write(changedText.toString());
+        }
     }
-
 }

@@ -8,13 +8,15 @@ public class Lab_4 {
             CReader c = new CReader();
             c.delComments();
             c.printText();
-
         }
         catch (FileNotFoundException e) {
             System.out.println("FNF");
         }
         catch (IOException e) {
             System.out.println("IOE");
+        }
+        catch(Exception e){
+            System.out.println("File error");
         }
 
     }
